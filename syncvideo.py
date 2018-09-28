@@ -7,7 +7,7 @@ from datetime import timedelta, date
 import datetime
 import settings
 
-parser = argparse.ArgumentParser(description="Arlo Arming robot")
+parser = argparse.ArgumentParser(description="Arlo Video Download robot")
 parser.add_argument('-v', '--verbose', dest='verbose', action='store_true', help='Enable verbose output')
 parser.add_argument('-d', '--delete', dest='delete', action='store_true', help='Delete video library after downloading')
 args = parser.parse_args()
@@ -51,7 +51,6 @@ try:
         if args.verbose:
             print(sys.argv[0] + ': Downloaded video '
                   + videofilename + ' from ' + recording['createdDate'] + '.')
-
 
     if args.verbose and args.delete:
         print(sys.argv[0] + ": Deleting Arlo Remote Library")
