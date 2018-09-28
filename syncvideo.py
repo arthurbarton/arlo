@@ -8,14 +8,17 @@ import datetime
 import settings
 
 parser = argparse.ArgumentParser(description="Arlo Video Download robot")
-parser.add_argument('-v', '--verbose', dest='verbose', action='store_true', help='Enable verbose output')
-parser.add_argument('-d', '--delete', dest='delete', action='store_true', help='Delete video library after downloading')
+parser.add_argument('-v', '--verbose',
+                    dest='verbose', action='store_true',
+                    help='Enable verbose output')
+parser.add_argument('-d', '--delete',
+                    dest='delete', action='store_true',
+                    help='Delete video library after downloading')
 args = parser.parse_args()
 
 # This is the 7 day free limit for the cloud library
 today = (date.today() - timedelta(days=0)).strftime("%Y%m%d")
 seven_days_ago = (date.today() - timedelta(days=7)).strftime("%Y%m%d")
-print("today:", today, "seven...:", seven_days_ago)
 
 if not os.path.exists(settings.VIDEO_DIR):
     if args.verbose:
@@ -23,7 +26,9 @@ if not os.path.exists(settings.VIDEO_DIR):
     os.makedirs(settings.VIDEO_DIR)
 
 if args.verbose:
-    print(sys.argv[0] + ": Downloading video library (" + seven_days_ago + ") till now into", settings.VIDEO_DIR)
+    print(sys.argv[0] +
+          ": Downloading video library (" + seven_days_ago +
+          ") till now into", settings.VIDEO_DIR)
     if args.delete:
         print(sys.argv[0] + ":      Deleting the remote library afterwards")
 
@@ -40,21 +45,43 @@ try:
     for recording in library:
         # Get video as a chunked stream; this function returns a generator.
         stream = arlo.StreamRecording(recording['presignedContentUrl'])
+        videodatestamp = datetime.datetime.fromtimestamp(
+            int(recording['name']) // 1000).strftime(
+                '%Y-%m-%d')
+
+        # Split downloads into VIDEO_DIR/DATE
+        thisvideopath = settings.VIDEO_DIR + '/' + videodatestamp
+        if not os.path.exists(thisvideopath):
+            os.makedirs(thisvideopath)
+
         videofilename = datetime.datetime.fromtimestamp(
             int(recording['name']) // 1000).strftime(
-                '%Y-%m-%d %H-%M-%S') + ' ' + recording['uniqueId'] + '.mp4'
-        with open(settings.VIDEO_DIR + '/' + videofilename, 'wb') as f:
-            for chunk in stream:
-                f.write(chunk)
+                '%H-%M-%S') + '_' + recording['uniqueId'] + '.mp4'
+
+        # TODO: make sure the downloaded file is complete?
+        fetch = True
+        if os.path.isfile(thisvideopath + '/' + videofilename):
+            if args.verbose:
+                print(sys.argv[0] + ":  Not overwriting existing video "
+                      + videofilename
+                      )
+            fetch = False
+
+        if fetch:
+            with open(thisvideopath + '/' + videofilename, 'wb') as f:
+                for chunk in stream:
+                    f.write(chunk)
             f.close()
+            if args.verbose:
+                print(sys.argv[0] + ': Downloaded video '
+                      + videofilename + ' from '
+                      + recording['createdDate'] + '.')
 
+    # Exit the download loop.
+    if args.delete:
         if args.verbose:
-            print(sys.argv[0] + ': Downloaded video '
-                  + videofilename + ' from ' + recording['createdDate'] + '.')
-
-    if args.verbose and args.delete:
-        print(sys.argv[0] + ": Deleting Arlo Remote Library")
-        result = arlo.BatchDeleteRecordings(library)
+            print(sys.argv[0] + ": Deleting Arlo Remote Library")
+    result = arlo.BatchDeleteRecordings(library)
 
     arlo.Logout()
     if args.verbose:
