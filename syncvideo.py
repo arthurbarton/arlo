@@ -81,7 +81,8 @@ try:
     if args.delete:
         if args.verbose:
             print(sys.argv[0] + ": Deleting Arlo Remote Library")
-    result = arlo.BatchDeleteRecordings(library)
+        result = arlo.BatchDeleteRecordings(library)
+        # TODO: check result
 
     arlo.Logout()
     if args.verbose:
