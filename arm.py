@@ -31,8 +31,9 @@ try:
     if args.verbose:
         print(sys.argv[0] + ":", args.mode.title() + "ed!")
 
-    # arlo.Logout()
-    # print("logged out")
+    arlo.Logout()
+    if args.verbose:
+        print(sys.argv[0] + ": Logged out")
 
 except Exception as e:
     print(e)
