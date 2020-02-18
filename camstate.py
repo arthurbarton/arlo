@@ -17,10 +17,10 @@ try:
         print(sys.argv[0] + ": Logging in with", settings.USERNAME)
     arlo = Arlo(settings.USERNAME, settings.PASSWORD)
 
-    if args.verbose:
-        if not args.percent:
+    if not args.percent:
+        if args.verbose:
             print(sys.argv[0] + ": Setting battery percent warning to 25%")
-            args.percent = '25'
+        args.percent = '25'
 
     if args.verbose:
         print(sys.argv[0] + ": Fetching devices")
