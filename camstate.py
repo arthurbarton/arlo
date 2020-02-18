@@ -6,6 +6,8 @@ import settings
 
 parser = argparse.ArgumentParser(description="Arlo Online/Status")
 parser.add_argument('-v', '--verbose', dest='verbose', action='store_true', help='Enable verbose output')
+parser.add_argument('-b', '--blacklist', dest='blacklist', action='store', help='Cameras to skip')
+parser.add_argument('-p', '--percent', dest='percent', action='store', help='What percentage of battery is too low')
 args = parser.parse_args()
 
 things = {}
@@ -14,6 +16,11 @@ try:
     if args.verbose:
         print(sys.argv[0] + ": Logging in with", settings.USERNAME)
     arlo = Arlo(settings.USERNAME, settings.PASSWORD)
+
+    if args.verbose:
+        if not args.percent:
+            print(sys.argv[0] + ": Setting battery percent warning to 25%")
+            args.percent = '25'
 
     if args.verbose:
         print(sys.argv[0] + ": Fetching devices")
@@ -53,11 +60,26 @@ try:
         t = things[i]
         if 'basestation' in t:
             if bool(t['connected']):
-                print("basestation", t['basestation'] + ": Connected")
+                if args.verbose:
+                    print("basestation", t['basestation'] + ": Connected")
             else:
-                print("basestation", t['basestation'] + ": Disconnected")
+                if args.verbose:
+                    print("basestation", t['basestation'] + ": Disconnected")
         elif 'camera' in t:
-            print("camera", t['camera'] + ":", str(t['batteryLevel']) + "%", "connection:", t['connectionState'], "signal:", t['signalStrength'])
+            if t['camera'] == args.blacklist:
+                continue
+            #
+            if t['connectionState'] != 'available':
+                print("Warning: Camera", t['camera'], "is", t['connectionState'])
+            if t['batteryLevel']:
+                if t['batteryLevel'] <= int(args.percent):
+                    print("Warning: Camera", t['camera'], "is at", str(t['batteryLevel']) + "%")
+                if args.verbose:
+                    print("camera", t['camera'] + ":", str(t['batteryLevel']) + "%", "connection:", t['connectionState'], "signal:", t['signalStrength'])
+            else:
+                if args.verbose:
+                    print("camera", t['camera'] + "connection:", t['connectionState'], "signal:", t['signalStrength'])
+
 
 except Exception as e:
     print("Oh no, an Exception")
