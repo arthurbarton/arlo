@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from Arlo import Arlo
+from arlo import Arlo
 import argparse
 import sys
 import settings
