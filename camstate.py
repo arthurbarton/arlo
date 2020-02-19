@@ -20,7 +20,9 @@ try:
     if not args.percent:
         if args.verbose:
             print(sys.argv[0] + ": Setting battery percent warning to 25%")
-        args.percent = '25'
+        percent = 25
+    else:
+        percent = args.percent
 
     if args.verbose:
         print(sys.argv[0] + ": Fetching devices")
@@ -72,7 +74,7 @@ try:
             if t['connectionState'] != 'available':
                 print("Warning: Camera", t['camera'], "is", t['connectionState'])
             if t['batteryLevel']:
-                if t['batteryLevel'] <= int(args.percent):
+                if t['batteryLevel'] <= int(percent):
                     print("Warning: Camera", t['camera'], "is at", str(t['batteryLevel']) + "%")
                 if args.verbose:
                     print("camera", t['camera'] + ":", str(t['batteryLevel']) + "%", "connection:", t['connectionState'], "signal:", t['signalStrength'])
