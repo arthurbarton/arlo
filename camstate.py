@@ -3,6 +3,7 @@ from arlo import Arlo
 import argparse
 import sys
 import settings
+import os
 
 parser = argparse.ArgumentParser(description="Arlo Online/Status")
 parser.add_argument('-v', '--verbose', dest='verbose', action='store_true', help='Enable verbose output')
@@ -53,7 +54,10 @@ try:
     # logout
     if args.verbose:
         print(sys.argv[0] + ": Logging out")
+    # Logout() emits a newline, which bypasses mail -E
+    sys.stdout = open(os.devnull, "w")
     arlo.Logout()
+    sys.stdout = sys.__stdout__
 
     if args.verbose:
         print(sys.argv[0] + ": Building report")
