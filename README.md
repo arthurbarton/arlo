@@ -5,7 +5,9 @@ This uses the excellent [jeffreydwalter/arlo](https://github.com/jeffreydwalter/
 ## Setup
 
 ```bash
-pip install --user arlo
+pip3 install --user arlo todoist-python
 ```
 
+## Config
 copy settings.example.py to settings.py and edit
+

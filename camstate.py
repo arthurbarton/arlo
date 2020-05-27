@@ -4,6 +4,7 @@ import argparse
 import sys
 import settings
 import os
+from todoist.api import TodoistAPI
 
 parser = argparse.ArgumentParser(description="Arlo Online/Status")
 parser.add_argument('-v', '--verbose', dest='verbose', action='store_true', help='Enable verbose output')
@@ -12,6 +13,16 @@ parser.add_argument('-p', '--percent', dest='percent', action='store', help='Wha
 args = parser.parse_args()
 
 things = {}
+
+
+def totask(s: str) -> (bool):
+    if args.verbose: print("todoist - ", s)
+    api = TodoistAPI(settings.TODOISTTOKEN)
+    api.sync()
+    inboxid = api.state['projects'][0]['id']
+    task = api.quick.add('ChangeBattery: '+ s + " " + settings.TODOISTLABEL,
+                         note='auto gen task', remminder='tomorrow')
+    True if int(task["id"]) else False
 
 try:
     if args.verbose:
@@ -77,9 +88,13 @@ try:
             #
             if t['connectionState'] != 'available':
                 print("Warning: Camera", t['camera'], "is", t['connectionState'])
+                s = t['camera'] + " is " + t['connectionState']
+                totask(s)
             if t['batteryLevel']:
                 if t['batteryLevel'] <= int(percent):
                     print("Warning: Camera", t['camera'], "is at", str(t['batteryLevel']) + "%")
+                    s = t['camera'] + " is at " + t['batteryLevel']
+                    totask(s)
                 if args.verbose:
                     print("camera", t['camera'] + ":", str(t['batteryLevel']) + "%", "connection:", t['connectionState'], "signal:", t['signalStrength'])
             else:

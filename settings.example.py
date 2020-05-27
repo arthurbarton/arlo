@@ -2,3 +2,5 @@
 USERNAME = ''
 PASSWORD = ''
 VIDEO_DIR = '/srv/arlo/videos'
+TODOISTTOKEN = ''
+TODOISTLABEL = '@something'
