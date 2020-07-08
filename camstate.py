@@ -93,7 +93,7 @@ try:
             if t['batteryLevel']:
                 if t['batteryLevel'] <= int(percent):
                     print("Warning: Camera", t['camera'], "is at", str(t['batteryLevel']) + "%")
-                    s = t['camera'] + " is at " + t['batteryLevel']
+                    s = str(t['camera']) + " is at " + str(t['batteryLevel'])
                     totask(s)
                 if args.verbose:
                     print("camera", t['camera'] + ":", str(t['batteryLevel']) + "%", "connection:", t['connectionState'], "signal:", t['signalStrength'])
