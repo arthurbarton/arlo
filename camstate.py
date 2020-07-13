@@ -14,30 +14,33 @@ args = parser.parse_args()
 
 things = {}
 
+def vprint(*arg):
+    if args.verbose and len(arg) > 0:
+        print(sys.argv[0] + ":", end='')
+        for e in arg:
+            print(" ", e, end='')
+        print("")
 
-def totask(s: str) -> (bool):
-    if args.verbose: print("todoist - ", s)
+def totask(s: str, v: bool) -> (bool):
+    if v: print("todoist - ", s)
     api = TodoistAPI(settings.TODOISTTOKEN)
     api.sync()
     inboxid = api.state['projects'][0]['id']
     task = api.quick.add('ChangeBattery: '+ s + " " + settings.TODOISTLABEL,
                          note='auto gen task', remminder='tomorrow')
-    True if int(task["id"]) else False
+    True if task["id"] else False
 
 try:
-    if args.verbose:
-        print(sys.argv[0] + ": Logging in with", settings.USERNAME)
+    vprint("Logging in with", settings.USERNAME)
     arlo = Arlo(settings.USERNAME, settings.PASSWORD)
 
     if not args.percent:
-        if args.verbose:
-            print(sys.argv[0] + ": Setting battery percent warning to 25%")
+        vprint("Setting battery percent warning to 25%")
         percent = 25
     else:
         percent = args.percent
 
-    if args.verbose:
-        print(sys.argv[0] + ": Fetching devices")
+    vprint("Fetching devices")
     # build a map of device Names to device IDs
     # as names are not exposed in GetCameraState()
     devices = arlo.GetDevices()
@@ -47,14 +50,12 @@ try:
         things[_item][d['deviceType']] = d['deviceName']
 
     # fetch basestations
-    if args.verbose:
-        print(sys.argv[0] + ": Fetching basestations")
+    vprint("Fetching basestations")
     basestations = arlo.GetDevices('basestation')
 
     for station in basestations:
         things[station['deviceId']]['connected'] = station['connectivity']['connected']
-        if args.verbose:
-            print(sys.argv[0] + ": Fetching cameras attached to basestation", station['deviceName'])
+        vprint("Fetching cameras attached to basestation", station['deviceName'])
         stationcameras = arlo.GetCameraState(station)
         for x in stationcameras['properties']:
             things[x['serialNumber']]['batteryLevel'] = x['batteryLevel']
@@ -63,43 +64,37 @@ try:
             things[x['serialNumber']]['updateAvailable'] = x['updateAvailable']
 
     # logout
-    if args.verbose:
-        print(sys.argv[0] + ": Logging out")
+    vprint("Logging out")
     # Logout() emits a newline, which bypasses mail -E
     sys.stdout = open(os.devnull, "w")
     arlo.Logout()
     sys.stdout = sys.__stdout__
 
-    if args.verbose:
-        print(sys.argv[0] + ": Building report")
-        print(things)
+    vprint("Building report")
+    #vprint(things)
     for i in things:
         t = things[i]
         if 'basestation' in t:
             if bool(t['connected']):
-                if args.verbose:
-                    print("basestation", t['basestation'] + ": Connected")
+                vprint("basestation", t['basestation'] + ": Connected")
             else:
-                if args.verbose:
-                    print("basestation", t['basestation'] + ": Disconnected")
+                vprint("basestation", t['basestation'] + ": Disconnected")
         elif 'camera' in t:
             if t['camera'] == args.blacklist:
                 continue
             #
             if t['connectionState'] != 'available':
-                print("Warning: Camera", t['camera'], "is", t['connectionState'])
                 s = t['camera'] + " is " + t['connectionState']
-                totask(s)
+                print(s)
+                totask(s, args.verbose)
             if t['batteryLevel']:
                 if t['batteryLevel'] <= int(percent):
-                    print("Warning: Camera", t['camera'], "is at", str(t['batteryLevel']) + "%")
-                    s = str(t['camera']) + " is at " + str(t['batteryLevel'])
-                    totask(s)
-                if args.verbose:
-                    print("camera", t['camera'] + ":", str(t['batteryLevel']) + "%", "connection:", t['connectionState'], "signal:", t['signalStrength'])
+                    s = str(t['camera']) + " is at " + str(t['batteryLevel']) + "%"
+                    print(s)
+                    totask(s, args.verbose)
+                vprint("camera", t['camera'] + ":", str(t['batteryLevel']) + "%", "connection:", t['connectionState'], "signal:", t['signalStrength'])
             else:
-                if args.verbose:
-                    print("camera", t['camera'] + "connection:", t['connectionState'], "signal:", t['signalStrength'])
+                vprint("camera", t['camera'] + "connection:", t['connectionState'], "signal:", t['signalStrength'])
 
 
 except Exception as e:
