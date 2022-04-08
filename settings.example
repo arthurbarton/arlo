@@ -1,0 +1,7 @@
+'arlo':
+  'username': 'user'      # arlo.com username
+  'password': 'password'  # arlo.com password
+  'battery': '25'         # battery % to alert below
+'todoist':
+  'token': 'API Token'       # todoist user api token
+  'project': 'Project Name'  # project-name (optional)

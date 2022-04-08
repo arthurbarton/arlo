@@ -5,9 +5,9 @@ This uses the excellent [jeffreydwalter/arlo](https://github.com/jeffreydwalter/
 ## Setup
 
 ```bash
-pip3 install --user arlo todoist-python
+pip3 install --user -r requirements.txt
 ```
 
 ## Config
-copy settings.example.py to settings.py and edit
+copy settings.example to settings.yaml and edit
 

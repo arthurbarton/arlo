@@ -1,0 +1,11 @@
+version: '3'
+services:
+  arlo:
+    build: .
+    image: arlo:latest
+    volumes:
+      - ./settings.yaml:/settings.yaml
+      - ./output:/output/
+    stdin_open: true
+    tty: true
+    restart: always
