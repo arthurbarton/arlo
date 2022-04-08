@@ -1,1 +1,2 @@
-0 8 * * * /app/syncvideo.py --devices /settings.yaml --output /output
+0 3 * * * /app/syncvideo.py --output /output
+0 23 * * * /app/app.py
