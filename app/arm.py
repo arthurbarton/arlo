@@ -25,21 +25,22 @@ def _set_mode(api: arlo.Arlo, mode: str, dev: dict) -> dict():
 
 
 parser = argparse.ArgumentParser(description="Arlo Arming robot")
+parser.add_argument('-s', '--settings', type=str, default='/settings.yaml',
+                    help='Path to settings.yaml')
 parser.add_argument('-c', '--confirm', action='store_true',
                     help='Confirm changes')
 parser.add_argument('-m', '--mode', choices=['arm','disarm'], action='store',
                     help='Arm or Disarm Mode for the Arlo', required=True)
 args = parser.parse_args()
 
-SETTINGS_FILE='settings.yaml'
-if not os.path.isfile(SETTINGS_FILE):
+if not os.path.isfile(args.settings):
     print('Error: You have not setup your settings.yaml file')
     sys.exit(1)
-with open(SETTINGS_FILE) as yamlconf:
+with open(args.settings) as yamlconf:
     CONF_FROM_FILE = yaml.safe_load(yamlconf)
 
 if 'arlo' not in CONF_FROM_FILE:
-    print(f'No \'arlo\' conf setting in {SETTINGS_FILE}')
+    print(f'No \'arlo\' conf setting in {args.settings}')
     sys.exit(1)
 ARLO_CONF = CONF_FROM_FILE['arlo']
 arlo = arlo.Arlo(ARLO_CONF['username'], ARLO_CONF['password'])

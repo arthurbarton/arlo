@@ -10,21 +10,22 @@ import arlo
 
 
 parser = argparse.ArgumentParser(description="Arlo Video Download robot")
+parser.add_argument('-s', '--settings', type=str, default='/settings.yaml',
+                    help='Path to settings.yaml')
 parser.add_argument('-o', '--output', required=True, type=str,
                     help='Local path to store downloads in')
 parser.add_argument('-d', '--delete', action='store_true',
                     help='Delete remote video library after downloading')
 args = parser.parse_args()
 
-SETTINGS_FILE='settings.yaml'
-if not os.path.isfile(SETTINGS_FILE):
+if not os.path.isfile(args.settings):
     print('Error: You have not setup your settings.yaml file')
     sys.exit(1)
-with open(SETTINGS_FILE) as yamlconf:
+with open(args.settings) as yamlconf:
     CONF_FROM_FILE = yaml.safe_load(yamlconf)
 
 if 'arlo' not in CONF_FROM_FILE:
-    print(f'No \'arlo\' conf setting in {SETTINGS_FILE}')
+    print(f'No \'arlo\' conf setting in {args.settings}')
     sys.exit(1)
 ARLO_CONF = CONF_FROM_FILE['arlo']
 arlo = arlo.Arlo(ARLO_CONF['username'], ARLO_CONF['password'])
